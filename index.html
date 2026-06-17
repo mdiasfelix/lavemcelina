@@ -17,7 +17,6 @@
       padding: 2rem 1rem;
     }
 
-    /* Ajuste para quando a tela de sucesso estiver ativa */
     body.success-active {
       padding: 0;
       overflow: hidden;
@@ -50,7 +49,15 @@
       font-weight: bold;
     }
 
-    input {
+    /* Gerenciamento de Etapas */
+    .step-panel {
+      display: none;
+    }
+    .step-panel.active {
+      display: block;
+    }
+
+    input, select {
       width: 100%;
       padding: 0.85rem 1.2rem;
       border: 1.5px solid #e8d5c8;
@@ -64,7 +71,78 @@
       transition: border-color 0.2s;
     }
 
-    input:focus { border-color: #c9956c; }
+    input:focus, select:focus { border-color: #c9956c; }
+
+    /* Estilização da Grade de Tamanhos */
+    .grid-tamanhos {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 1.5rem;
+    }
+
+    .opcao-tamanho {
+      background: #fdf6f0;
+      border: 2px solid #e8d5c8;
+      border-radius: 12px;
+      padding: 1rem 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      user-select: none;
+    }
+
+    .opcao-tamanho .letra {
+      font-size: 1.3rem;
+      font-weight: bold;
+      color: #3d2b1f;
+      display: block;
+    }
+
+    .opcao-tamanho .qtd-restante {
+      font-size: 0.8rem;
+      color: #914550;
+      margin-top: 4px;
+      display: block;
+    }
+
+    /* Estado de Alerta (2 ou menos) */
+    .opcao-tamanho .qtd-restante.alerta {
+      color: #e67e22;
+      font-weight: bold;
+    }
+
+    /* Estado Selecionado */
+    .opcao-tamanho.selecionado {
+      border-color: #914550;
+      background: #fbeee6;
+      transform: scale(1.02);
+    }
+
+    /* Estado Esgotado */
+    .opcao-tamanho.esgotado {
+      background: #e0e0e0;
+      border-color: #cccccc;
+      opacity: 0.6;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+    .opcao-tamanho.esgotado .letra {
+      text-decoration: line-through;
+      color: #7f8c8d;
+    }
+    .opcao-tamanho.esgotado .qtd-restante {
+      color: #7f8c8d;
+    }
+
+    /* Seletor de Marcas Oculto por padrão */
+    .container-marca {
+      display: none;
+      margin-bottom: 1rem;
+      animation: fadeIn 0.3s ease forwards;
+    }
+    .container-marca.visivel {
+      display: block;
+    }
 
     button {
       width: 100%;
@@ -82,24 +160,34 @@
 
     button:hover { background: #fdf39c; }
     button:active { transform: scale(0.98); }
+    button:disabled { background: #bdc3c7; color: #7f8c8d; cursor: not-allowed; }
 
-    /* Container de sucesso em tela cheia com fundo branco */
+    .btn-pular {
+      background: transparent;
+      color: #914550;
+      border: none;
+      font-size: 0.95rem;
+      text-decoration: underline;
+      margin-top: 1.25rem;
+      cursor: pointer;
+      display: inline-block;
+      font-weight: bold;
+    }
+    .btn-pular:hover { color: #fff; }
+
+    /* Container de sucesso */
     .success {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
       z-index: 9999;
       background: #ffffff;
       animation: fadeIn 0.5s ease forwards;
     }
 
-    /* Imagem configurada para se ajustar de forma responsiva sem distorcer ou cortar */
     .success-img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: contain; 
       display: block;
     }
@@ -122,18 +210,33 @@
 <body>
 
 <div class="card" id="main-card">
+  <span class="emoji">⭐</span>
+  <h1>Confirme sua presença</h1>
+  <p>A Celina tá chegando, junte-se <br>ao bloco desse neném.</p>
 
-  <div id="form-area">
-    <span class="emoji">⭐</span>
-    <h1>Confirme sua presença</h1>
-    <p>A Celina tá chegando, junte-se <br>ao bloco desse neném.</p>
-
+  <div id="etapa-1" class="step-panel active">
     <input type="text" id="nome" placeholder="Seu nome completo" autocomplete="off" />
-    <span class="error-msg" id="erro">Por favor, escreva seu nome antes de confirmar.</span>
-
-    <button onclick="confirmar()">Bora!</button>
+    <span class="error-msg" id="erro-nome">Por favor, escreva seu nome antes de avançar.</span>
+    <button onclick="irParaEtapa2()">Bora!</button>
   </div>
 
+  <div id="etapa-2" class="step-panel">
+    <div class="grid-tamanhos" id="grade-tamanhos">
+      </div>
+
+    <div class="container-marca" id="container-marca">
+      <select id="marca-fralda">
+        <option value="" disabled selected>Escolha a marca da fralda</option>
+        <option value="Pampers">Pampers</option>
+        <option value="Huggies">Huggies</option>
+        <option value="MommyPoko">MommyPoko</option>
+      </select>
+      <span class="error-msg" id="erro-marca" style="margin-top: -0.5rem; margin-bottom: 0.75rem;">Selecione uma marca para continuar.</span>
+    </div>
+
+    <button id="btn-confirmar-final" onclick="finalizarDados(false)">Confirmar Presença</button>
+    <button class="btn-pular" onclick="finalizarDados(true)">Pular</button>
+  </div>
 </div>
 
 <div class="success" id="sucesso">
@@ -141,45 +244,136 @@
 </div>
 
 <script>
-  const PAINEL_URL = 'https://script.google.com/macros/s/AKfycbxY-8LF3IGo5yM3RB506VbxjBivO20TSZHNxdIomLnRMzHpEDNcCUv4OJEd3AUfUHrd/exec';
+  const PAINEL_URL = 'https://script.google.com/macros/s/AKfycbyrx-QAxItpig4Z4DrVkb1tYM8X13d-O8QpR9h63xzUKxmVoROOIAiuSse7CyBNCtBFjQ/exec';
+  
+  let dadosFormulario = { nome: '', tamanho: '', marca: '' };
+  let estoqueAtual = null;
 
-  function confirmar() {
-    const nome = document.getElementById('nome').value.trim();
-    const erro = document.getElementById('erro');
+  window.addEventListener('DOMContentLoaded', obterEstoque);
 
-    if (!nome) {
-      erro.style.display = 'block';
+  function obterEstoque() {
+    const grade = document.getElementById('grade-tamanhos');
+    grade.innerHTML = '<div style="grid-column: span 2; color: #914550; font-weight: bold; padding: 1rem;">Buscando opções reais...</div>';
+
+    // Fazemos um POST com text/plain para ignorar completamente o cache da Google sem dar erro de CORS
+    fetch(PAINEL_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ action: 'obterEstoque' })
+    })
+    .then(res => res.json())
+    .then(data => {
+      estoqueAtual = data;
+      renderizarGradeTamanhos();
+    })
+    .catch(err => {
+      console.error("Erro ao buscar dados de estoque:", err);
+      grade.innerHTML = '<div style="grid-column: span 2; color: #c0392b; font-weight: bold; padding: 1rem;">Erro ao carregar o estoque. Por favor, recarregue a página.</div>';
+    });
+  }
+
+  function renderizarGradeTamanhos() {
+    const grade = document.getElementById('grade-tamanhos');
+    grade.innerHTML = '';
+    
+    if (!estoqueAtual) return;
+    
+    const tamanhos = ['P', 'M', 'G', 'XG'];
+    
+    tamanhos.forEach(tam => {
+      const qtd = (estoqueAtual[tam] !== undefined) ? Number(estoqueAtual[tam]) : 0; 
+      const div = document.createElement('div');
+      div.className = 'opcao-tamanho';
+      
+      if (qtd <= 0) {
+        div.classList.add('esgotado');
+      }
+
+      const labelAlerta = qtd <= 2 && qtd > 0 ? 'alerta' : '';
+      const textoRestante = qtd <= 0 ? 'esgotado' : `restam ${qtd}`;
+
+      div.innerHTML = `
+        <span class="letra">${tam}</span>
+        <span class="qtd-restante ${labelAlerta}">${textoRestante}</span>
+      `;
+      
+      if (qtd > 0) {
+        div.onclick = () => selecionarTamanho(div, tam);
+      }
+      
+      grade.appendChild(div);
+    });
+  }
+
+  function selecionarTamanho(elemento, tamanho) {
+    document.querySelectorAll('.opcao-tamanho').forEach(el => el.classList.remove('selecionado'));
+    elemento.classList.add('selecionado');
+    dadosFormulario.tamanho = tamanho;
+    document.getElementById('container-marca').classList.add('visivel');
+  }
+
+  function irParaEtapa2() {
+    const nomeInput = document.getElementById('nome').value.trim();
+    const erroNome = document.getElementById('erro-nome');
+
+    if (!nomeInput) {
+      erroNome.style.display = 'block';
       return;
     }
+    erroNome.style.display = 'none';
+    dadosFormulario.nome = nomeInput;
 
-    erro.style.display = 'none';
+    document.getElementById('etapa-1').classList.remove('active');
+    document.getElementById('etapa-2').classList.add('active');
+    
+    renderizarGradeTamanhos();
+  }
 
-    const btn = document.querySelector('button');
-    btn.textContent = 'Confirmando...';
-    btn.disabled = true;
+  function finalizarDados(pulouEtapa) {
+    const btnFinal = document.getElementById('btn-confirmar-final');
+    const erroMarca = document.getElementById('erro-marca');
+    
+    if (pulouEtapa) {
+      dadosFormulario.tamanho = '';
+      dadosFormulario.marca = '';
+    } else {
+      if (!dadosFormulario.tamanho) {
+        alert("Por favor, selecione um tamanho de fralda ou clique em 'Pular esta etapa'.");
+        return;
+      }
+      const marcaSelecionada = document.getElementById('marca-fralda').value;
+      if (!marcaSelecionada) {
+        erroMarca.style.display = 'block';
+        return;
+      }
+      erroMarca.style.display = 'none';
+      dadosFormulario.marca = marcaSelecionada;
+    }
+
+    btnFinal.textContent = 'Confirmando...';
+    btnFinal.disabled = true;
 
     fetch(PAINEL_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain' },
       body: JSON.stringify({
-        nome: nome,
+        action: 'salvarConvidado',
+        nome: dadosFormulario.nome,
+        tamanho: dadosFormulario.tamanho,
+        marca: dadosFormulario.marca,
         data: new Date().toLocaleString('pt-BR', { timeZone: 'America/Fortaleza' })
       })
     })
-    .catch(() => {})
+    .catch(err => console.warn("Aviso de rede processado"))
     .finally(() => {
-      // Esconde o card com o formulário
       document.getElementById('main-card').style.display = 'none';
-      
-      // Ativa a tela cheia e exibe a imagem de sucesso
       document.body.classList.add('success-active');
       document.getElementById('sucesso').style.display = 'block';
     });
   }
 
   document.getElementById('nome').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') confirmar();
+    if (e.key === 'Enter') irParaEtapa2();
   });
 </script>
 
