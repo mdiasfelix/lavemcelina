@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Confirmação de Presença</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      font-family: 'Courier', serif;
+      padding: 2rem 1rem;
+    }
+
+    /* Ajuste para quando a tela de sucesso estiver ativa */
+    body.success-active {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .card {
+      background: #e0a1aa;
+      border-radius: 20px;
+      padding: 3rem 2.5rem;
+      max-width: 420px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 4px 32px rgba(0,0,0,0.07);
+    }
+
+    .emoji { font-size: 3rem; margin-bottom: 1.25rem; display: block; }
+
+    h1 {
+      font-size: 1.5rem;
+      color: #fff;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+
+    p {
+      color: #914550;
+      font-size: 1rem;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 0.85rem 1.2rem;
+      border: 1.5px solid #e8d5c8;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-family: inherit;
+      color: #3d2b1f;
+      background: #fdf6f0;
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #c9956c; }
+
+    button {
+      width: 100%;
+      padding: 1rem;
+      background: #87d3f7;
+      color: #004673;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.05rem;
+      font-family: inherit;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    button:hover { background: #fdf39c; }
+    button:active { transform: scale(0.98); }
+
+    /* Container de sucesso em tela cheia com fundo branco */
+    .success {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      background: #ffffff;
+      animation: fadeIn 0.5s ease forwards;
+    }
+
+    /* Imagem configurada para se ajustar de forma responsiva sem distorcer ou cortar */
+    .success-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain; 
+      display: block;
+    }
+
+    .error-msg {
+      color: #c0392b;
+      font-size: 0.88rem;
+      margin-top: -0.5rem;
+      margin-bottom: 0.75rem;
+      display: none;
+      font-family: sans-serif;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="card" id="main-card">
+
+  <div id="form-area">
+    <span class="emoji">⭐</span>
+    <h1>Confirme sua presença</h1>
+    <p>A Celina tá chegando, junte-se <br>ao bloco desse neném.</p>
+
+    <input type="text" id="nome" placeholder="Seu nome completo" autocomplete="off" />
+    <span class="error-msg" id="erro">Por favor, escreva seu nome antes de confirmar.</span>
+
+    <button onclick="confirmar()">Bora!</button>
+  </div>
+
+</div>
+
+<div class="success" id="sucesso">
+  <img src="https://i.imgur.com/tlKMBE9.png" alt="Presença Confirmada" class="success-img" />
+</div>
+
+<script>
+  const PAINEL_URL = 'https://script.google.com/macros/s/AKfycbymSQsZ34c8PRpSMRCZCFp-fNz89Y8pyEciSY8xCP6OJjqe5dKSRXrpy7TaodKGML5j/exec';
+
+  function confirmar() {
+    const nome = document.getElementById('nome').value.trim();
+    const erro = document.getElementById('erro');
+
+    if (!nome) {
+      erro.style.display = 'block';
+      return;
+    }
+
+    erro.style.display = 'none';
+
+    const btn = document.querySelector('button');
+    btn.textContent = 'Confirmando...';
+    btn.disabled = true;
+
+    fetch(PAINEL_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nome: nome,
+        data: new Date().toLocaleString('pt-BR', { timeZone: 'America/Fortaleza' })
+      })
+    })
+    .catch(() => {})
+    .finally(() => {
+      // Esconde o card com o formulário
+      document.getElementById('main-card').style.display = 'none';
+      
+      // Ativa a tela cheia e exibe a imagem de sucesso
+      document.body.classList.add('success-active');
+      document.getElementById('sucesso').style.display = 'block';
+    });
+  }
+
+  document.getElementById('nome').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') confirmar();
+  });
+</script>
+
+</body>
+</html>
